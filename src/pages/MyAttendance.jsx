@@ -9,6 +9,8 @@ import { useMyLeaves } from '../hooks/useLeaves';
 import { toast } from 'react-hot-toast';
 import { reportService } from '../services/reportService';
 import { useQuery } from '@tanstack/react-query';
+import { getShiftConfig } from '../utils/shiftConfig';
+import { calculateEstimatedOutTime } from '../utils/timeUtils';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -17,6 +19,9 @@ const fmtTime = (isoStr) =>
 
 const lunchMinutes = (row) => {
   if (row.lunch_duration_ms) return Math.round(row.lunch_duration_ms / 60000);
+  if (row.lunch_start_time && !row.lunch_end_time) {
+    return Math.max(0, Math.round((Date.now() - new Date(row.lunch_start_time).getTime()) / 60000));
+  }
   return null;
 };
 
@@ -467,6 +472,9 @@ const MyAttendance = () => {
                 ) : history.map((row, i) => {
                   const lunchMin = lunchMinutes(row);
                   const lunchStart = lunchStartTime(row);
+                  const { shiftHours } = getShiftConfig(profile?.employee_id);
+                  const estOut = (row.status === 'punched_in') ? calculateEstimatedOutTime(row, profile, shiftHours, 0) : null;
+
                   return (
                     <tr key={i}>
                       <td>
@@ -481,7 +489,15 @@ const MyAttendance = () => {
                         {fmtTime(row.punch_in_time)}
                       </td>
                       <td className="text-sm font-medium text-slate-600">
-                        {fmtTime(row.punch_out_time)}
+                        {row.punch_out_time ? (
+                          fmtTime(row.punch_out_time)
+                        ) : estOut ? (
+                          <div className="flex flex-col gap-0.5" title="Estimated Out Time">
+                            <span className="text-xs font-bold text-indigo-500">Est: {fmtTime(estOut)}</span>
+                          </div>
+                        ) : (
+                          <span className="text-slate-300 text-sm">--</span>
+                        )}
                       </td>
                       <td>
                         {lunchStart || lunchMin ? (
@@ -503,7 +519,7 @@ const MyAttendance = () => {
                                   <span className="text-xs font-medium text-amber-600">{lunchStart}</span>
                                 </div>
                               )}
-                              {lunchMin !== null && lunchMin > 0 && (
+                              {lunchMin !== null && lunchMin >= 0 && (
                                 <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest pl-4">
                                   {lunchMin} min
                                 </span>

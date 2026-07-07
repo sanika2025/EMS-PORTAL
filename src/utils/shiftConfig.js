@@ -1,4 +1,6 @@
-export const EIGHT_HOUR_EMPLOYEES = ['FS-CO002', 'AI-CO004', 'UIUX-CO007'];
+export const SPECIAL_EMPLOYEE_ID = 'FS-CO002'; // Change this ID as needed
+export const EIGHT_HOUR_SHIFT = 8;
+export const NINE_HOUR_SHIFT = 9;
 
 /**
  * Returns the shift configuration for a given employee ID.
@@ -6,8 +8,7 @@ export const EIGHT_HOUR_EMPLOYEES = ['FS-CO002', 'AI-CO004', 'UIUX-CO007'];
  * @returns {object} - Shift configuration including shiftHours, SHIFT_MS, and AUTO_PUNCH_OUT_MS
  */
 export const getShiftConfig = (employeeId) => {
-  const is8HourEmployee = EIGHT_HOUR_EMPLOYEES.includes(employeeId);
-  const shiftHours = is8HourEmployee ? 8 : 9;
+  const shiftHours = (employeeId === SPECIAL_EMPLOYEE_ID) ? EIGHT_HOUR_SHIFT : NINE_HOUR_SHIFT;
   
   return {
     shiftHours,

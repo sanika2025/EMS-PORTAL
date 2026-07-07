@@ -23,7 +23,7 @@ import { communicationService } from '../services/communicationService';
 import { employeeService } from '../services/employeeService';
 import { supabase } from '../lib/supabaseClient';
 import { getShiftConfig } from '../utils/shiftConfig';
-
+import { calculateEstimatedOutTime } from '../utils/timeUtils';
 // New Components
 import CelebrationCard from '../components/CelebrationCard';
 import NoticeBoard from '../components/NoticeBoard';
@@ -121,6 +121,7 @@ const EmployeeDashboard = () => {
   const [overtimeElapsedMs, setOvertimeElapsedMs] = useState(0);
   const [clockDrift, setClockDrift] = useState(0);
   const [actionLoading, setActionLoading] = useState(false);
+  const [estimatedOutTime, setEstimatedOutTime] = useState(null);
   const [dismissedRejectionId, setDismissedRejectionId] = useState(null);
   const [dismissedApprovalId, setDismissedApprovalId] = useState(null);
 
@@ -224,6 +225,7 @@ const EmployeeDashboard = () => {
 
     setLunchElapsedMs(rec?.lunch_start_time && !rec?.lunch_end_time ? getNow() - new Date(rec.lunch_start_time).getTime() : 0);
     setOvertimeElapsedMs(rec?.overtime_start_time ? getNow() - new Date(rec.overtime_start_time).getTime() : 0);
+    setEstimatedOutTime(calculateEstimatedOutTime(rec, profile, shiftHours, clockDrift));
 
     timerRef.current = setInterval(() => {
       setElapsedMs(calcElapsedMs(rec, clockDrift));
@@ -234,6 +236,7 @@ const EmployeeDashboard = () => {
       if (rec?.overtime_start_time && !rec?.overtime_end_time) {
         setOvertimeElapsedMs(calibratedNow - new Date(rec.overtime_start_time).getTime());
       }
+      setEstimatedOutTime(calculateEstimatedOutTime(rec, profile, shiftHours, clockDrift));
     }, 1000);
   };
 
@@ -269,6 +272,7 @@ const EmployeeDashboard = () => {
       setElapsedMs(0);
       setLunchElapsedMs(0);
       setOvertimeElapsedMs(0);
+      setEstimatedOutTime(null);
     }
     return () => stopTimer();
   }, [record, clockDrift]);
