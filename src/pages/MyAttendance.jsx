@@ -23,6 +23,19 @@ const lunchMinutes = (row) => {
 const lunchStartTime = (row) =>
   row.lunch_start_time ? fmtTime(row.lunch_start_time) : null;
 
+const getOvertimeMs = (row) => {
+  if (row.overtime_duration_ms > 0) return row.overtime_duration_ms;
+  if (row.overtime_start_time && row.overtime_end_time) {
+    return new Date(row.overtime_end_time).getTime() - new Date(row.overtime_start_time).getTime();
+  }
+  return 0;
+};
+
+const overtimeMinutes = (row) => {
+  const ms = getOvertimeMs(row);
+  return ms > 0 ? Math.round(ms / 60000) : null;
+};
+
 // ── Calendar View ──────────────────────────────────────────────────────────────
 
 const statusColor = (status) => {
@@ -169,6 +182,14 @@ const CalendarView = ({ history }) => {
                         </span>
                       </div>
                     )}
+                    {overtimeMinutes(row) !== null && overtimeMinutes(row) > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Clock size={14} className="text-orange-500 shrink-0" />
+                        <span className="text-[11px] font-bold text-orange-600">
+                          {overtimeMinutes(row)} min OT
+                        </span>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Duration pinned to bottom */}
@@ -267,6 +288,8 @@ const MyAttendance = () => {
       }
       case '30days':
         return { days: 30 };
+      case 'all':
+        return { limit: null }; // Fetch all records without limit or date restriction
       default:
         return { limit: 10 };
     }
@@ -279,10 +302,13 @@ const MyAttendance = () => {
   const approvedLeaves = myLeaves.filter(l => l.status === 'approved').length;
   const daysPresent = history.filter(h => ['punched_in', 'punched_out', 'auto_punched_out'].includes(h.status)).length;
   const totalHours = history.reduce((acc, h) => acc + (h.total_hours || 0), 0).toFixed(1);
+  const totalOvertimeMsValue = history.reduce((acc, h) => acc + getOvertimeMs(h), 0);
+  const totalOvertimeMin = Math.round(totalOvertimeMsValue / 60000);
 
   const stats = [
     { label: "Days Present", value: historyLoading ? '...' : daysPresent.toString(), icon: CheckCircle2, color: "#10b981", bg: "#ecfdf5" },
     { label: "Total Hours", value: historyLoading ? '...' : `${totalHours}h`, icon: Clock, color: "#4f46e5", bg: "#eef2ff" },
+    { label: "Overtime", value: historyLoading ? '...' : `${totalOvertimeMin} min`, icon: Clock, color: "#f59e0b", bg: "#fef3c7" },
     { label: "Leaves Taken", value: historyLoading ? '...' : approvedLeaves.toString(), icon: CalendarDays, color: "#ef4444", bg: "#fef2f2" },
     { label: "Avg. Daily", value: historyLoading ? '...' : (daysPresent > 0 ? (totalHours / daysPresent).toFixed(1) + 'h' : '0h'), icon: TrendingUp, color: "#8b5cf6", bg: "#f5f3ff" },
   ];
@@ -337,7 +363,7 @@ const MyAttendance = () => {
       <PageHeader title="My Attendance" subtitle="Track your daily presence and work hours" />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         {stats.map((stat, i) => (
           <StatCard key={i} title={stat.label} value={stat.value} icon={stat.icon} color={stat.color} bgColor={stat.bg} />
         ))}
@@ -391,6 +417,7 @@ const MyAttendance = () => {
                 <option value="week">This Week</option>
                 <option value="month">This Month</option>
                 <option value="30days">Last 30 Days</option>
+                <option value="all">All Time</option>
               </select>
             </div>
           </div>
@@ -422,6 +449,7 @@ const MyAttendance = () => {
                     </div>
                   </th>
                   <th>Duration</th>
+                  <th>Overtime</th>
                   <th>Status</th>
                   <th>Report Status</th>
                   <th style={{ width: 100, textAlign: 'right' }}>Reports</th>
@@ -431,11 +459,11 @@ const MyAttendance = () => {
                 {historyLoading ? (
                   [1, 2, 3].map(i => (
                     <tr key={i}>
-                      <td colSpan="9"><Skeleton height={40} /></td>
+                      <td colSpan="10"><Skeleton height={40} /></td>
                     </tr>
                   ))
                 ) : history.length === 0 ? (
-                  <tr><td colSpan="9" className="text-center p-8 text-slate-400">No history found</td></tr>
+                  <tr><td colSpan="10" className="text-center p-8 text-slate-400">No history found</td></tr>
                 ) : history.map((row, i) => {
                   const lunchMin = lunchMinutes(row);
                   const lunchStart = lunchStartTime(row);
@@ -488,6 +516,9 @@ const MyAttendance = () => {
                       </td>
                       <td className="text-sm font-bold text-slate-900">
                         {row.total_hours ? `${row.total_hours}h` : row.status === 'punched_in' ? 'Ongoing' : '--'}
+                      </td>
+                      <td className="text-sm font-bold text-amber-600">
+                        {overtimeMinutes(row) ? `${overtimeMinutes(row)} min` : '--'}
                       </td>
                       <td>
                         <div className="flex items-center gap-2">
