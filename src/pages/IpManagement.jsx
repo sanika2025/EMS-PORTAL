@@ -240,7 +240,7 @@ const IpManagement = () => {
                     <span className="text-xs font-mono text-slate-500">{heartbeat.previous_ip}</span>
                     {heartbeat.ip_changed_at && (
                       <span className="text-[10px] text-slate-300">
-                        changed {new Date(heartbeat.ip_changed_at).toLocaleDateString()}
+                        changed {new Date(heartbeat.ip_changed_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                       </span>
                     )}
                   </div>
@@ -445,7 +445,7 @@ const IpManagement = () => {
                     </td>
                     <td className="text-xs text-slate-500 italic">{log.validation_reason || '—'}</td>
                     <td className="text-xs font-medium text-slate-400">
-                      {new Date(log.attendance_date).toLocaleDateString()}
+                      {new Date(log.attendance_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                     </td>
                   </tr>
                 ))}

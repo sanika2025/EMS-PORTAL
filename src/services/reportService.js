@@ -268,7 +268,7 @@ export const reportService = {
       .insert([{
         user_id: employeeId,
         title: 'Report Reviewed',
-        message: `Your work report for ${new Date(report.report_date).toLocaleDateString()} has been reviewed by HR.`,
+        message: `Your work report for ${new Date(report.report_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })} has been reviewed by HR.`,
         type: 'success'
       }]);
 

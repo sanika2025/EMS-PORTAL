@@ -165,7 +165,7 @@ const MyLeaves = () => {
       const deadlineDate = new Date(new Date(formData.end).getTime() + 20 * 24 * 60 * 60 * 1000);
       const confirmSubmit = await Swal.fire({
         title: 'Submit without Certificate?',
-        text: `You are applying for Medical/Sick Leave of 2+ days without a certificate. You must upload the certificate by ${deadlineDate.toLocaleDateString()} (within 20 days after your leave ends) to avoid conversion to Casual Leave or LWP.`,
+        text: `You are applying for Medical/Sick Leave of 2+ days without a certificate. You must upload the certificate by ${deadlineDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })} (within 20 days after your leave ends) to avoid conversion to Casual Leave or LWP.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#635BFF',
@@ -240,8 +240,8 @@ const MyLeaves = () => {
                   Medical Certificate Required {item.medical_doc_status === 'medical_doc_rejected' && '(Previously Rejected)'}
                 </h4>
                 <p className={`text-xs font-medium mt-0.5 ${isUrgent ? 'text-red-700' : 'text-amber-700'}`}>
-                  Your leave from <strong>{new Date(item.start_date).toLocaleDateString()} to {new Date(item.end_date).toLocaleDateString()}</strong> requires a certificate.
-                  Deadline to upload is <strong>{deadline.toLocaleDateString()}</strong> ({diffDays > 0 ? `${diffDays} days remaining` : 'overdue!'}).
+                  Your leave from <strong>{new Date(item.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })} to {new Date(item.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}</strong> requires a certificate.
+                  Deadline to upload is <strong>{deadline.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}</strong> ({diffDays > 0 ? `${diffDays} days remaining` : 'overdue!'}).
                   {item.verification_metadata?.rejection_reason && (
                     <span className="block mt-1 text-[11px] italic font-bold text-red-600">Rejection reason: "{item.verification_metadata.rejection_reason}"</span>
                   )}
@@ -544,10 +544,10 @@ const MyLeaves = () => {
             <div className="flex flex-col gap-4 pt-2">
               <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-xl">
                 <p className="text-[11px] font-bold text-indigo-800 leading-tight">
-                  Leave Period: <strong>{new Date(uploadingLeave.start_date).toLocaleDateString()} to {new Date(uploadingLeave.end_date).toLocaleDateString()}</strong>
+                  Leave Period: <strong>{new Date(uploadingLeave.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })} to {new Date(uploadingLeave.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}</strong>
                 </p>
                 <p className="text-[10px] text-slate-500 mt-1">
-                  Deadline to submit: <strong>{new Date(uploadingLeave.medical_doc_deadline).toLocaleDateString()}</strong>
+                  Deadline to submit: <strong>{new Date(uploadingLeave.medical_doc_deadline).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}</strong>
                 </p>
               </div>
               <div>

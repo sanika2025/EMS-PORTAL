@@ -245,7 +245,7 @@ const UsersPage = () => {
                     <span className={`badge-pill ${u.status === 'active' ? 'success' : 'neutral'}`}>{u.status}</span>
                   </td>
                   <td className="text-sm text-slate-500">
-                    {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'Never'}
+                    {u.created_at ? new Date(u.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : 'Never'}
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="flex justify-end gap-1" onClick={(e) => e.stopPropagation()}>

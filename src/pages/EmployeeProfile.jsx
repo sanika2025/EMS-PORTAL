@@ -141,8 +141,8 @@ const EmployeeProfile = () => {
               {[
                 { icon: Briefcase, label: 'Department', value: employee.departments?.name || 'Unassigned' },
                 { icon: Mail, label: 'Email', value: employee.email },
-                { icon: Calendar, label: 'Official Joining', value: employee.joining_date ? new Date(employee.joining_date).toLocaleDateString() : 'N/A' },
-                { icon: Clock, label: 'Portal Joined', value: employee.joined_at ? new Date(employee.joined_at).toLocaleDateString() : 'N/A' },
+                { icon: Calendar, label: 'Official Joining', value: employee.joining_date ? new Date(employee.joining_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : 'N/A' },
+                { icon: Clock, label: 'Portal Joined', value: employee.joined_at ? new Date(employee.joined_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : 'N/A' },
               ].map((item, i) => (
                 <div key={i} className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
                   <item.icon size={16} className="text-indigo-600" />
@@ -251,7 +251,7 @@ const EmployeeProfile = () => {
                       ) : leaveHistory.map((row, i) => (
                         <tr key={i}>
                           <td className="text-sm font-bold text-slate-700">{row.leave_type}</td>
-                          <td className="text-sm text-slate-600">{new Date(row.start_date).toLocaleDateString()} to {new Date(row.end_date).toLocaleDateString()}</td>
+                          <td className="text-sm text-slate-600">{new Date(row.start_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })} to {new Date(row.end_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}</td>
                           <td className="text-sm text-slate-600 truncate max-w-[200px]">{row.reason}</td>
                           <td style={{ textAlign: 'right' }}>
                             <span className={`badge-pill ${row.status === 'approved' ? 'success' : row.status === 'rejected' ? 'danger' : 'warning'}`}>
@@ -303,7 +303,7 @@ const EmployeeProfile = () => {
                                 <span>•</span>
                                 <span>{(doc.file_size / 1024 / 1024).toFixed(2)} MB</span>
                                 <span>•</span>
-                                <span>{new Date(doc.created_at).toLocaleDateString()}</span>
+                                <span>{new Date(doc.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}</span>
                               </div>
                             </div>
                           </div>

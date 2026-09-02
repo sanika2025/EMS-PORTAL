@@ -619,10 +619,10 @@ export const taskService = {
       t.project_name || 'Personal',
       t.departmentName || 'General',
       t.priority || 'Medium',
-      t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB') : 'No deadline',
+      t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : 'No deadline',
       `${t.progress || 0}%`,
       t.status || 'pending',
-      t.created_at ? new Date(t.created_at).toLocaleDateString('en-GB') : '',
+      t.created_at ? new Date(t.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '',
     ]);
 
     const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');

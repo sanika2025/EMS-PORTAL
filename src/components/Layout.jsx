@@ -30,6 +30,36 @@ const timeAgo = (date) => {
   return "just now";
 };
 
+// Helper to format dates in legacy notification messages
+const formatMessageDates = (msg) => {
+  if (!msg) return msg;
+  // Match either YYYY-MM-DD or MM/DD/YYYY formats
+  return msg.replace(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b|\b(\d{1,2})\/(\d{1,2})\/(\d{4})\b/g, (match, y1, m1, d1, p1, p2, p3) => {
+    let day, month, year;
+    
+    if (y1) {
+      // YYYY-MM-DD format
+      year = y1; month = m1; day = d1;
+    } else {
+      // MM/DD/YYYY or DD/MM/YYYY format
+      year = p3;
+      if (parseInt(p1) > 12) {
+        day = p1; month = p2;
+      } else if (parseInt(p2) > 12) {
+        month = p1; day = p2;
+      } else {
+        // Ambiguous (e.g. 7/7/2026), assume US format since 6/19/2026 is US format in DB
+        month = p1; day = p2;
+      }
+    }
+    
+    const yy = year.slice(-2);
+    const mm = String(month).padStart(2, '0');
+    const dd = String(day).padStart(2, '0');
+    return `${dd}/${mm}/${yy}`;
+  });
+};
+
 const Layout = ({ children }) => {
   const { user, profile, logout, fullName, roleTitle } = useAuth();
 
@@ -398,7 +428,7 @@ const Layout = ({ children }) => {
                         </Typography>
                       </Box>
                       <Typography sx={{ fontSize: 12, color: '#64748b', lineHeight: 1.4, whiteSpace: 'normal' }}>
-                        {n.message}
+                        {formatMessageDates(n.message)}
                       </Typography>
                     </MenuItem>
                   ))

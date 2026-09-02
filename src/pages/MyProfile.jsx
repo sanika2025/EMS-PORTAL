@@ -106,7 +106,7 @@ const MyProfile = () => {
   };
 
   const departmentName = profile?.departments?.name || 'Unassigned';
-  const joinDate = profile?.joined_at ? new Date(profile.joined_at).toLocaleDateString() : 'N/A';
+  const joinDate = profile?.joined_at ? new Date(profile.joined_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : 'N/A';
 
   return (
     <div className="animate-in fade-in duration-500">
@@ -135,11 +135,11 @@ const MyProfile = () => {
             </div>
             <div className="flex items-center gap-3 text-sm">
               <Calendar size={16} className="text-slate-400" />
-              <span className="text-slate-600">Joined Company: {profile?.joining_date ? new Date(profile.joining_date).toLocaleDateString() : 'N/A'}</span>
+              <span className="text-slate-600">Joined Company: {profile?.joining_date ? new Date(profile.joining_date).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : 'N/A'}</span>
             </div>
             <div className="flex items-center gap-3 text-sm">
               <Clock size={16} className="text-slate-400" />
-              <span className="text-slate-600">Portal Access: {profile?.joined_at ? new Date(profile.joined_at).toLocaleDateString() : 'N/A'}</span>
+              <span className="text-slate-600">Portal Access: {profile?.joined_at ? new Date(profile.joined_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : 'N/A'}</span>
             </div>
           </div>
         </Box>

@@ -630,7 +630,7 @@ const HRDashboard = () => {
                     </span>
                   </td>
                   <td className="text-sm font-medium">{notice.author?.full_name || 'System'}</td>
-                  <td className="text-[11px] font-bold text-slate-400">{new Date(notice.created_at).toLocaleDateString()}</td>
+                  <td className="text-[11px] font-bold text-slate-400">{new Date(notice.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}</td>
                   <td style={{ textAlign: 'right' }}>
                     <div className="flex justify-end gap-2">
                       <button onClick={() => handleToggleNotice(notice.id, notice.is_active)} className="p-1.5 hover:bg-slate-100 rounded-lg transition-all" title="Archive/Restore">

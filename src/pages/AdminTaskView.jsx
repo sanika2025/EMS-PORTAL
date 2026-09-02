@@ -1142,7 +1142,7 @@ const AdminTaskView = () => {
                           </div>
                           <div className="flex items-center gap-2 mt-3 px-1">
                             <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">{comment.author?.full_name}</span>
-                            <span className="text-[11px] font-bold text-slate-300">• {new Date(comment.created_at).toLocaleDateString('en-GB')}</span>
+                            <span className="text-[11px] font-bold text-slate-300">• {new Date(comment.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}</span>
                           </div>
                         </div>
                       </div>

@@ -153,7 +153,7 @@ const MyDocuments = () => {
                   <div className="flex items-center gap-3 mt-2 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
                     <span className="flex items-center gap-1"><Clock size={12} /> {(doc.file_size / 1024 / 1024).toFixed(2)} MB</span>
                     <span>•</span>
-                    <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(doc.created_at).toLocaleDateString()}</span>
+                    <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(doc.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}</span>
                   </div>
                 </div>
               </div>

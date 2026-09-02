@@ -483,7 +483,7 @@ const LeaveManagement = () => {
                           <td>
                             <div className="text-xs font-semibold text-slate-700">
                               <p className="font-bold text-slate-900">{leaveTypeConfig[leave.leave_type]?.label || leave.leave_type}</p>
-                              <p className="text-[10px] text-slate-500 mt-0.5">{start.toLocaleDateString()} - {end.toLocaleDateString()} ({days} Days)</p>
+                              <p className="text-[10px] text-slate-500 mt-0.5">{start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })} - {end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })} ({days} Days)</p>
                             </div>
                           </td>
                           <td>
@@ -502,7 +502,7 @@ const LeaveManagement = () => {
                               
                               {deadline && (
                                 <span className="text-[10px] text-slate-400 font-medium">
-                                  Deadline: {deadline.toLocaleDateString()}
+                                  Deadline: {deadline.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                                 </span>
                               )}
                             </div>
@@ -603,7 +603,7 @@ const LeaveManagement = () => {
                 <div className="p-3 rounded-xl mb-3 bg-slate-50 border border-slate-100">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 text-slate-700 font-bold text-sm">
-                      <Calendar size={14} className="text-slate-400" /> {start.toLocaleDateString()} - {end.toLocaleDateString()}
+                      <Calendar size={14} className="text-slate-400" /> {start.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })} - {end.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                       <span className="text-xs text-indigo-600 font-black ml-1">({leave.total_days || days} days)</span>
                     </div>
                     {leave.is_sandwich_applied && (
