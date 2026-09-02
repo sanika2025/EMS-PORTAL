@@ -922,12 +922,22 @@ const EmployeeDashboard = () => {
                   </div>
                 </div>
 
+                {/* Timer hidden
                 <div className="text-4xl font-black tracking-tighter text-slate-900 mb-6 flex items-baseline gap-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                   {timerDisplay}
                   {isPunchedIn && (
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   )}
                 </div>
+                */}
+                {elapsedMs >= 8 * 60 * 60 * 1000 ? (
+                  <div className="mb-6 flex items-center gap-2 text-red-500">
+                    <CheckCircle size={36} />
+                    <span className="text-lg font-bold">8 Hours Completed</span>
+                  </div>
+                ) : (
+                  <div className="mb-6 h-9"></div>
+                )}
 
                 {/* Sub-label: shows auto punch-out countdown when nearing 9h30m */}
                 {isPunchedIn && elapsedMs >= SHIFT_MS && elapsedMs < AUTO_PUNCH_OUT_MS && (
@@ -1057,12 +1067,15 @@ const EmployeeDashboard = () => {
                     />
                   </div>
 
+                  {/* Timer hidden
                   <div className="text-4xl font-black tracking-tighter text-slate-900 mb-6 flex items-baseline gap-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                     {formatMs(overtimeElapsedMs)}
                     {record.overtime_start_time && !record.overtime_end_time && (
                       <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
                     )}
                   </div>
+                  */}
+                  <div className="mb-6"></div>
 
                   {isMobile ? (
                     <div className="flex flex-col gap-3 p-4 bg-indigo-50/50 rounded-[14px] border border-indigo-100/50 mt-2">
