@@ -91,7 +91,7 @@ const EmployeeDashboard = () => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery('(max-width:767px)');
 
-  const { shiftHours, SHIFT_MS, AUTO_PUNCH_OUT_MS } = getShiftConfig(profile?.employee_id);
+  const { shiftHours, SHIFT_MS, RESUME_WORK_THRESHOLD_MS, AUTO_PUNCH_OUT_MS } = getShiftConfig(profile?.employee_id);
 
   // ── Queries & Mutations ───────────────────────────────────────────────────
   const { data: record, isLoading: attendanceLoading } = useActiveAttendance(user?.id);
@@ -283,7 +283,8 @@ const EmployeeDashboard = () => {
     if (
       record?.status === 'punched_in' &&
       !autoPunchOutFiredRef.current &&
-      elapsedMs >= AUTO_PUNCH_OUT_MS
+      elapsedMs >= AUTO_PUNCH_OUT_MS &&
+      !record?.overtime_start_time
     ) {
       autoPunchOutFiredRef.current = true;
       console.log(`[Attendance] Auto punch-out triggered at ${shiftHours}h30m`);
@@ -312,8 +313,8 @@ const EmployeeDashboard = () => {
   const isHalfDayComplete = elapsedMs >= HALF_DAY_MS;
   const remainingMs = Math.max(0, SHIFT_MS - elapsedMs);
   const isLunchExceeded = isLunchBreak && lunchElapsedMs >= LUNCH_LIMIT_MS;
-  // Overtime card: only visible after the shift has been punched out AND 9h were worked
-  const showOvertimeCard = isCompleted && isShiftComplete;
+  // Overtime UI completely removed
+  const showOvertimeCard = false;
 
 
 
@@ -414,6 +415,16 @@ const EmployeeDashboard = () => {
           attendanceId: record.id
         });
       } else {
+        if (record?.overtime_start_time && !record?.overtime_end_time) {
+          try {
+            await endOvertimeMutation.mutateAsync({
+              recordId: record.id,
+              startTime: record.overtime_start_time
+            });
+          } catch (e) {
+            console.error('Failed to end overtime during punch out:', e);
+          }
+        }
         await punchOutMutation.mutateAsync({
           recordId: record.id,
           punchInTime: record.punch_in_time,
@@ -974,13 +985,32 @@ const EmployeeDashboard = () => {
                       </div>
                     ) : isPunchedIn ? (
                       <div className="flex flex-col gap-2">
-                        <button
-                          className={`btn-ems w-full h-12 rounded-[14px] ${(isShiftComplete || earlyExitRequest?.status === 'approved') ? 'btn-ems-danger shadow-lg shadow-red-100' : 'btn-ems-secondary'}`}
-                          onClick={handlePunchOut}
-                          disabled={actionLoading || (isPunchedIn && !isHalfDayComplete && earlyExitRequest?.status !== 'approved')}
-                        >
-                          <Square size={18} /> {(isShiftComplete || earlyExitRequest?.status === 'approved') ? 'Punch Out' : `Punch Out${!isHalfDayComplete ? ' (min 4h)' : ''}`}
-                        </button>
+                        {elapsedMs >= RESUME_WORK_THRESHOLD_MS && !record?.overtime_start_time ? (
+                          <button
+                            className="btn-ems btn-ems-primary w-full h-12 rounded-[14px]"
+                            style={{ background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
+                            onClick={handleStartOvertime}
+                            disabled={actionLoading}
+                          >
+                            <Play size={18} /> Resume Work
+                          </button>
+                        ) : record?.overtime_start_time ? (
+                          <button
+                            className="btn-ems w-full h-12 rounded-[14px] btn-ems-danger shadow-lg shadow-red-100"
+                            onClick={handlePunchOut}
+                            disabled={actionLoading}
+                          >
+                            <Square size={18} /> Punch Out / End Work
+                          </button>
+                        ) : (
+                          <button
+                            className={`btn-ems w-full h-12 rounded-[14px] ${(isShiftComplete || earlyExitRequest?.status === 'approved') ? 'btn-ems-danger shadow-lg shadow-red-100' : 'btn-ems-secondary'}`}
+                            onClick={handlePunchOut}
+                            disabled={actionLoading || (isPunchedIn && !isHalfDayComplete && earlyExitRequest?.status !== 'approved')}
+                          >
+                            <Square size={18} /> {(isShiftComplete || earlyExitRequest?.status === 'approved') ? 'Punch Out' : `Punch Out${!isHalfDayComplete ? ' (min 4h)' : ''}`}
+                          </button>
+                        )}
 
                         {earlyExitRequest?.status === 'rejected' && earlyExitRequest.id !== dismissedRejectionId && (
                           <div className="w-full rounded-[14px] bg-red-50 text-red-700 font-bold text-sm border border-red-200 overflow-hidden mt-1 animate-in slide-in-from-top-2">
@@ -1047,7 +1077,8 @@ const EmployeeDashboard = () => {
               </div>
             </div>
 
-            {/* Card 1b: Overtime Slot — only visible after punch-out when 9h worked */}
+            {/* 
+            // Card 1b: Overtime Slot — only visible after punch-out when 9h worked
             {showOvertimeCard && (
               <div className="relative overflow-hidden min-h-[220px]">
                 <div className="card-ems-static h-full p-6 border-l-[6px] border-indigo-500 animate-in fade-in zoom-in duration-500" style={{ borderRadius: '18px' }}>
@@ -1067,14 +1098,13 @@ const EmployeeDashboard = () => {
                     />
                   </div>
 
-                  {/* Timer hidden
-                  <div className="text-4xl font-black tracking-tighter text-slate-900 mb-6 flex items-baseline gap-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                    {formatMs(overtimeElapsedMs)}
-                    {record.overtime_start_time && !record.overtime_end_time && (
-                      <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                    )}
-                  </div>
-                  */}
+                  // Timer hidden
+                  // <div className="text-4xl font-black tracking-tighter text-slate-900 mb-6 flex items-baseline gap-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                  //   {formatMs(overtimeElapsedMs)}
+                  //   {record.overtime_start_time && !record.overtime_end_time && (
+                  //     <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+                  //   )}
+                  // </div>
                   <div className="mb-6"></div>
 
                   {isMobile ? (
@@ -1108,6 +1138,7 @@ const EmployeeDashboard = () => {
                 </div>
               </div>
             )}
+            */}
 
             {/* Card 2: Lunch Break (Visible anytime during active shift until completed) */}
             <div className={`transition-all duration-500 ${isPunchedIn && !isCompleted && !record?.lunch_end_time ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none hidden'}`}>

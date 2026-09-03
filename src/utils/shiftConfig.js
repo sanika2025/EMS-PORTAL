@@ -1,4 +1,6 @@
 export const EIGHT_HOUR_SHIFT = 8;
+export const RESUME_WORK_THRESHOLD_HOURS = 8.5;
+export const AUTO_PUNCH_OUT_HOURS = 9;
 
 /**
  * Returns the shift configuration for a given employee ID.
@@ -11,6 +13,7 @@ export const getShiftConfig = (employeeId) => {
   return {
     shiftHours,
     SHIFT_MS: shiftHours * 60 * 60 * 1000,
-    AUTO_PUNCH_OUT_MS: (shiftHours + 0.5) * 60 * 60 * 1000,
+    RESUME_WORK_THRESHOLD_MS: RESUME_WORK_THRESHOLD_HOURS * 60 * 60 * 1000,
+    AUTO_PUNCH_OUT_MS: AUTO_PUNCH_OUT_HOURS * 60 * 60 * 1000,
   };
 };

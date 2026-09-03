@@ -47,6 +47,19 @@ const formatOvertimeMs = (ms) => {
   return `${parseFloat((ms / 3600000).toFixed(2))}h`;
 };
 
+const getAdjustedTotalHours = (row) => {
+  const baseHours = row.totalHours || 0;
+  let otMs = row.overtime_duration_ms || 0;
+  if (otMs <= 0 && row.overtime_start_time && row.overtime_end_time) {
+    otMs = new Date(row.overtime_end_time).getTime() - new Date(row.overtime_start_time).getTime();
+  }
+  if (otMs > 0) {
+    const otHours = otMs / 3600000;
+    return (baseHours + otHours).toFixed(1);
+  }
+  return baseHours > 0 ? baseHours.toFixed(1) : 0;
+};
+
 const HRDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -388,7 +401,7 @@ const HRDashboard = () => {
                   <th style={{ textAlign: 'center' }}>Punch In</th>
                   <th style={{ textAlign: 'center' }}>Punch Out</th>
                   <th style={{ textAlign: 'center' }}>Lunch</th>
-                  <th style={{ textAlign: 'center' }}>Overtime</th>
+                  <th style={{ textAlign: 'center' }}>Total Hrs</th>
                   <th style={{ textAlign: 'right' }}>Status</th>
                   <th style={{ textAlign: 'center' }}>Action</th>
                 </tr>
@@ -442,39 +455,7 @@ const HRDashboard = () => {
                       )}
                     </td>
                     <td className="text-sm font-bold text-center text-indigo-600">
-                      {row.overtime_start_time && !row.overtime_end_time ? (
-                        <Tooltip
-                          title={
-                            <div className="p-1.5 text-xs space-y-1">
-                              <p className="font-bold border-b border-white/20 pb-0.5 mb-1">Overtime Session</p>
-                              <p>Start: {new Date(row.overtime_start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                              <p>End: <b>Active</b></p>
-                            </div>
-                          }
-                          arrow
-                          placement="top"
-                        >
-                          <span className="text-indigo-600 font-extrabold cursor-help animate-pulse">
-                            Active
-                          </span>
-                        </Tooltip>
-                      ) : row.overtime_duration_ms > 0 ? (
-                        <Tooltip
-                          title={
-                            <div className="p-1.5 text-xs space-y-1">
-                              <p className="font-bold border-b border-white/20 pb-0.5 mb-1">Overtime Session</p>
-                              <p>Start: {row.overtime_start_time ? new Date(row.overtime_start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}</p>
-                              <p>End: {row.overtime_end_time ? new Date(row.overtime_end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}</p>
-                            </div>
-                          }
-                          arrow
-                          placement="top"
-                        >
-                          <span className="cursor-help underline decoration-dotted decoration-indigo-300 underline-offset-4">
-                            {formatOvertimeMs(row.overtime_duration_ms)}
-                          </span>
-                        </Tooltip>
-                      ) : '-'}
+                      {getAdjustedTotalHours(row) > 0 ? `${getAdjustedTotalHours(row)}h` : row.rawStatus === 'punched_in' ? 'Ongoing' : '-'}
                     </td>
                     <td style={{ textAlign: 'right' }}>
                       {row.is_force_punched_out ? (

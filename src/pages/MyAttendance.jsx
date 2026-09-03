@@ -41,6 +41,16 @@ const overtimeMinutes = (row) => {
   return ms > 0 ? Math.round(ms / 60000) : null;
 };
 
+const getAdjustedTotalHours = (row) => {
+  const baseHours = row.total_hours || 0;
+  const otMs = getOvertimeMs(row);
+  if (otMs > 0) {
+    const otHours = otMs / 3600000;
+    return (baseHours + otHours).toFixed(1);
+  }
+  return baseHours > 0 ? baseHours : 0;
+};
+
 // ── Calendar View ──────────────────────────────────────────────────────────────
 
 const statusColor = (status) => {
@@ -306,16 +316,17 @@ const MyAttendance = () => {
 
   const approvedLeaves = myLeaves.filter(l => l.status === 'approved').length;
   const daysPresent = history.filter(h => ['punched_in', 'punched_out', 'auto_punched_out'].includes(h.status)).length;
-  const totalHours = history.reduce((acc, h) => acc + (h.total_hours || 0), 0).toFixed(1);
   const totalOvertimeMsValue = history.reduce((acc, h) => acc + getOvertimeMs(h), 0);
   const totalOvertimeMin = Math.round(totalOvertimeMsValue / 60000);
+  // Adjusted total hours to include overtime globally for stats
+  const adjustedTotalHours = history.reduce((acc, h) => acc + parseFloat(getAdjustedTotalHours(h) || 0), 0).toFixed(1);
 
   const stats = [
     { label: "Days Present", value: historyLoading ? '...' : daysPresent.toString(), icon: CheckCircle2, color: "#10b981", bg: "#ecfdf5" },
-    { label: "Total Hours", value: historyLoading ? '...' : `${totalHours}h`, icon: Clock, color: "#4f46e5", bg: "#eef2ff" },
+    { label: "Total Hours", value: historyLoading ? '...' : `${adjustedTotalHours}h`, icon: Clock, color: "#4f46e5", bg: "#eef2ff" },
     { label: "Overtime", value: historyLoading ? '...' : `${totalOvertimeMin} min`, icon: Clock, color: "#f59e0b", bg: "#fef3c7" },
     { label: "Leaves Taken", value: historyLoading ? '...' : approvedLeaves.toString(), icon: CalendarDays, color: "#ef4444", bg: "#fef2f2" },
-    { label: "Avg. Daily", value: historyLoading ? '...' : (daysPresent > 0 ? (totalHours / daysPresent).toFixed(1) + 'h' : '0h'), icon: TrendingUp, color: "#8b5cf6", bg: "#f5f3ff" },
+    { label: "Avg. Daily", value: historyLoading ? '...' : (daysPresent > 0 ? (adjustedTotalHours / daysPresent).toFixed(1) + 'h' : '0h'), icon: TrendingUp, color: "#8b5cf6", bg: "#f5f3ff" },
   ];
 
   const statusBadgeClass = (status) => {
@@ -454,7 +465,6 @@ const MyAttendance = () => {
                     </div>
                   </th>
                   <th>Duration</th>
-                  <th>Overtime</th>
                   <th>Status</th>
                   <th>Report Status</th>
                   <th style={{ width: 100, textAlign: 'right' }}>Reports</th>
@@ -531,10 +541,7 @@ const MyAttendance = () => {
                         )}
                       </td>
                       <td className="text-sm font-bold text-slate-900">
-                        {row.total_hours ? `${row.total_hours}h` : row.status === 'punched_in' ? 'Ongoing' : '--'}
-                      </td>
-                      <td className="text-sm font-bold text-amber-600">
-                        {overtimeMinutes(row) ? `${overtimeMinutes(row)} min` : '--'}
+                        {getAdjustedTotalHours(row) > 0 ? `${getAdjustedTotalHours(row)}h` : row.status === 'punched_in' ? 'Ongoing' : '--'}
                       </td>
                       <td>
                         <div className="flex items-center gap-2">
