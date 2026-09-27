@@ -17,3 +17,6 @@ export const getShiftConfig = (employeeId) => {
     AUTO_PUNCH_OUT_MS: AUTO_PUNCH_OUT_HOURS * 60 * 60 * 1000,
   };
 };
+
+
+
