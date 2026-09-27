@@ -51,6 +51,43 @@ const getAdjustedTotalHours = (row) => {
   return baseHours > 0 ? baseHours : 0;
 };
 
+const formatTotalDuration = (row) => {
+  if (!row) return '--';
+  if (row.status === 'punched_in') return 'Ongoing';
+
+  if (row.punch_in_time && row.punch_out_time) {
+    const startMs = new Date(row.punch_in_time).getTime();
+    const endMs = new Date(row.punch_out_time).getTime();
+    let durationMs = endMs - startMs;
+
+    if (row.lunch_duration_ms) {
+      durationMs -= row.lunch_duration_ms;
+    } else if (row.lunch_start_time && row.lunch_end_time) {
+      durationMs -= (new Date(row.lunch_end_time).getTime() - new Date(row.lunch_start_time).getTime());
+    }
+
+    if (durationMs > 0) {
+      const totalMinutes = Math.round(durationMs / 60000);
+      const h = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      if (h > 0 && m > 0) return `${h}h ${m}m`;
+      if (h > 0) return `${h}h`;
+      return `${m}m`;
+    }
+  }
+
+  const adjustedHours = parseFloat(getAdjustedTotalHours(row));
+  if (!adjustedHours || adjustedHours <= 0) return '--';
+
+  const totalMinutes = Math.round(adjustedHours * 60);
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  return `${m}m`;
+};
+
+
 // ── Calendar View ──────────────────────────────────────────────────────────────
 
 const statusColor = (status) => {
@@ -209,9 +246,9 @@ const CalendarView = ({ history }) => {
                   
                   {/* Duration pinned to bottom */}
                   <div className="mt-auto pt-3 flex items-center justify-between">
-                    {row.total_hours > 0 && (
+                    {formatTotalDuration(row) !== '--' && (
                       <span className="text-[13px] font-bold text-[#059669]">
-                        {row.total_hours}h
+                        {formatTotalDuration(row)}
                       </span>
                     )}
                   </div>
@@ -541,7 +578,7 @@ const MyAttendance = () => {
                         )}
                       </td>
                       <td className="text-sm font-bold text-slate-900">
-                        {getAdjustedTotalHours(row) > 0 ? `${getAdjustedTotalHours(row)}h` : row.status === 'punched_in' ? 'Ongoing' : '--'}
+                        {formatTotalDuration(row)}
                       </td>
                       <td>
                         <div className="flex items-center gap-2">
