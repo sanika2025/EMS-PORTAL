@@ -353,26 +353,53 @@ export const leaveService = {
     const holidayDates = (holidays || []).map(h => h.holiday_date);
 
     let totalDays = 0;
-    let hasHolidayOrMonday = false;
+    let isSandwich = false;
 
-    // Create a working copy for the loop
+    const toLocalISODate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+
     let current = new Date(start);
     while (current <= end) {
-      const dateStr = current.toISOString().split('T')[0];
-      const dayOfWeek = current.getDay(); // 0=Sun, 1=Mon, ...
+      const dateStr = toLocalISODate(current);
+      const dayOfWeek = current.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
 
-      totalDays++;
-      
-      // If it's a Monday (1) or a Company Holiday, flag it
-      if (dayOfWeek === 1 || holidayDates.includes(dateStr)) {
-        hasHolidayOrMonday = true;
+      if (holidayDates.includes(dateStr)) {
+        // Company Holiday: Do not count as a leave day, skip it
+        current.setDate(current.getDate() + 1);
+        continue;
+      }
+
+      if (dayOfWeek === 0) {
+        // Sunday (Weekly Off): Check for sandwich condition (Saturday + Sunday + Monday)
+        const prevDay = new Date(current);
+        prevDay.setDate(prevDay.getDate() - 1);
+        const nextDay = new Date(current);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        const prevDayStr = toLocalISODate(prevDay);
+        const nextDayStr = toLocalISODate(nextDay);
+
+        // Ensure both Saturday and Monday are within the requested leave range, and are not holidays
+        const isSaturdayLeave = (start <= prevDay && prevDay <= end) && !holidayDates.includes(prevDayStr);
+        const isMondayLeave = (start <= nextDay && nextDay <= end) && !holidayDates.includes(nextDayStr);
+
+        if (isSaturdayLeave && isMondayLeave) {
+          totalDays++;
+          isSandwich = true;
+        }
+      } else {
+        // Normal working days
+        totalDays++;
       }
       
-      // Move to next day
       current.setDate(current.getDate() + 1);
     }
 
-    return { totalDays, isSandwich: hasHolidayOrMonday };
+    return { totalDays, isSandwich };
   },
 
   /**
