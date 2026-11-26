@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 const CountdownBanner = () => {
-  const targetDate = new Date('2026-08-08T00:00:00').getTime();
+  const targetDate = new Date('2026-12-15T00:00:00').getTime();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -143,7 +143,7 @@ const CountdownBanner = () => {
               Get ready! The COCPIT goes live on
             </p>
             <span className="text-2xl md:text-3xl font-black text-white tracking-tight mt-0.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]">
-              08 August 2026
+              15 December 2026
             </span>
           </div>
         </div>
